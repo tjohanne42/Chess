@@ -16,7 +16,7 @@ NAME = chess
 
 CC = gcc -Wall -Wextra -Werror
 
-SRC = main.c tools_SDL.C start_game.c print_game.c init_game.c human_left_click.c pred/pred_from_point.c
+SRC = main.c tools_SDL.C start_game.c print_game.c init_game.c human_left_click.c pred/pred_from_point.c check.c
 
 OBJ = $(SRC:.c=.o)
 

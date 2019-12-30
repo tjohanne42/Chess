@@ -1,5 +1,11 @@
 #include "chess.h"
 
+void			checkmate(t_game_state *game_s)
+{
+	if (game_s->turn == 'w')
+		game_s->turn = 'w';
+}
+
 void				IA_play(t_game_state *game_s, t_player *player)
 {
 	//useless
@@ -10,6 +16,7 @@ void				IA_play(t_game_state *game_s, t_player *player)
 		game_s->turn = 'd';
 	else
 		game_s->turn = 'w';
+	checkmate(game_s);
 	//print_game(game_s);
 }
 
@@ -55,7 +62,6 @@ void			human_mouse_motion(SDL_Event event, t_game_state *game_s)
 		{
 			print_game(PRED.game_s[i]);
 			print_red_diff(PRED.game_s[i], *game_s);
-			// mettre en rouge les differences
 			SDL_RenderPresent(RENDERER);
 			SDL_Delay(20);
 			PRINT_PRED = i;
@@ -76,7 +82,6 @@ void			human_mouse_motion(SDL_Event event, t_game_state *game_s)
 	{
 		print_game(HIST[(HIST_NB - 2) % HIST_MAX]);
 		print_red_diff(HIST[(HIST_NB - 2) % HIST_MAX], *game_s);
-		// mettre en rouge les difference
 		SDL_RenderPresent(RENDERER);
 		SDL_Delay(20);
 		PRINT_HIST = SDL_TRUE;
@@ -106,9 +111,9 @@ void				start_game(t_player *p1, t_player *p2)
 	EXIT_VALUE = SDL_FALSE;
 	while (!EXIT_VALUE)
 	{
-		if (game_s.turn == p1->color && p1->human == SDL_FALSE)
+		if (game_s.turn == p1->color && p1->human == SDL_FALSE && !game_s.checkmate)
 			IA_play(&game_s, p1);
-		else if (game_s.turn == p2->color && p2->human == SDL_FALSE)
+		else if (game_s.turn == p2->color && p2->human == SDL_FALSE && !game_s.checkmate)
 			IA_play(&game_s, p2);
 		if (p1->human == SDL_TRUE || p2->human == SDL_TRUE)
 		{
@@ -117,12 +122,12 @@ void				start_game(t_player *p1, t_player *p2)
 			if (event.type == SDL_QUIT)
 				EXIT_VALUE = SDL_TRUE;
 			else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT &&
-				game_s.turn == p1->color && p1->human == SDL_TRUE)
+				game_s.turn == p1->color && p1->human == SDL_TRUE && !game_s.checkmate)
 				human_left_click(&game_s, p1, event);
 			else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT &&
-				game_s.turn == p2->color && p2->human == SDL_TRUE)
+				game_s.turn == p2->color && p2->human == SDL_TRUE && !game_s.checkmate)
 				human_left_click(&game_s, p2, event);
-			else if (event.type == SDL_MOUSEMOTION)
+			else if (event.type == SDL_MOUSEMOTION && !game_s.checkmate)
 				human_mouse_motion(event, &game_s);
 			SDL_RenderPresent(RENDERER);
 		}

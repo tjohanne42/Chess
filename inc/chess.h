@@ -37,6 +37,7 @@ typedef	struct 		s_game_state
 {
 	t_piece			board[64];
 	t_rock			rock;
+	_Bool			checkmate;
 	char			turn;
 }					t_game_state;
 
@@ -68,6 +69,9 @@ void			human_left_click(t_game_state *game_s, t_player *player, SDL_Event event)
 void			pred_from_point(t_game_state *game_s, t_player *player, SDL_Point point);
 void			add_to_hist(t_game_state *game_s);
 void			human_mouse_motion(SDL_Event event, t_game_state *game_s);
+size_t			get_board_from_pos(size_t x, size_t y);
+_Bool			check(t_game_state *game_s, char color, t_player *player);
+void			checkmate(t_game_state *game_s);
 
 SDL_Window		*WINDOW;
 SDL_Renderer	*RENDERER;

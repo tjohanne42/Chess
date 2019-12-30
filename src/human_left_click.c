@@ -43,6 +43,7 @@ static void			do_a_barrell_roll(t_game_state *game_s)
 	game_s->rock.p1r = HIST[HIST_NB % HIST_MAX].rock.p1r;
 	game_s->rock.p2l = HIST[HIST_NB % HIST_MAX].rock.p2l;
 	game_s->rock.p2r = HIST[HIST_NB % HIST_MAX].rock.p2r;
+	game_s->checkmate = HIST[HIST_NB % HIST_MAX].checkmate;
 	HIST_NB++;
 }
 
@@ -68,6 +69,7 @@ void				add_to_hist(t_game_state *game_s)
 	HIST[HIST_NB % HIST_MAX].rock.p1r = game_s->rock.p1r;
 	HIST[HIST_NB % HIST_MAX].rock.p2l = game_s->rock.p2l;
 	HIST[HIST_NB % HIST_MAX].rock.p2r = game_s->rock.p2r;
+	HIST[HIST_NB % HIST_MAX].checkmate = game_s->checkmate;
 	HIST_NB++;
 }
 
@@ -95,6 +97,7 @@ static _Bool		point_in_pred(t_game_state *game_s, SDL_Point point)
 			game_s->rock.p1r = PRED.game_s[i].rock.p1r;
 			game_s->rock.p2l = PRED.game_s[i].rock.p2l;
 			game_s->rock.p2r = PRED.game_s[i].rock.p2r;
+			game_s->checkmate = PRED.game_s[i].checkmate;
 			PRED.nb = 0;
 			PRED.target.x = 0;
 			if (game_s->turn == 'w')
@@ -102,6 +105,7 @@ static _Bool		point_in_pred(t_game_state *game_s, SDL_Point point)
 			else
 				game_s->turn = 'w';
 			add_to_hist(game_s);
+			checkmate(game_s);
 			return (SDL_TRUE);
 		}
 		i++;

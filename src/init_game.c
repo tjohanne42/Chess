@@ -53,6 +53,7 @@ void			init_game(t_player *p1, t_player *p2, t_game_state *game_s)
 	game_s->rock.p1r = SDL_TRUE;
 	game_s->rock.p2l = SDL_TRUE;
 	game_s->rock.p2r = SDL_TRUE;
+	game_s->checkmate = SDL_FALSE;
 	init_game_s(p1, p2, game_s);
 	PRED.nb = 0;
 	PRED.target.x = 0;
