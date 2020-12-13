@@ -331,27 +331,32 @@ class MusicPlayer:
 		if color1 == GREEN_LINE:
 			surface.blit(self.surface[name], (tmp_x + music_pos / (self.tracklist[self.index][1] * 1000) * 290, tmp_y - 4))
 
+	def music_event_volumeline(self):
+		if mx - self.x < self.interactive_rect["volumeline"].x:
+			self.music_set_volume(0, rel=False)
+		elif mx - self.x > self.interactive_rect["volumeline"].x + self.interactive_rect["volumeline"].w:
+			self.music_set_volume(1, rel=False)
+		else:
+			self.music_set_volume((mx - self.x - self.interactive_rect["volumeline"].x) * 100 / self.interactive_rect["volumeline"].w / 100, rel=False)
+
+	def music_event_trackline(self):
+		if mx - self.x < self.interactive_rect["trackline"].x:
+			self.music_set_pos(0, rel=False)
+		elif mx - self.x > self.interactive_rect["trackline"].x + self.interactive_rect["trackline"].w:
+			self.music_set_pos(self.tracklist[self.index][1] * 1000, rel=False)
+		else:
+			self.music_set_pos((mx - self.x - self.interactive_rect["trackline"].x) * 100 / self.interactive_rect["trackline"].w * self.tracklist[self.index][1] * 10, rel=False)
+	
 	def event(self, event):
 		self.music_if_ended_play_next()
 		if event.type == pg.MOUSEMOTION:
 			mx, my = pg.mouse.get_pos()
 			if self.hold == "volumeline":
-				if mx - self.x < self.interactive_rect["volumeline"].x:
-					self.music_set_volume(0, rel=False)
-				elif mx - self.x > self.interactive_rect["volumeline"].x + self.interactive_rect["volumeline"].w:
-					self.music_set_volume(1, rel=False)
-				else:
-					self.music_set_volume((mx - self.x - self.interactive_rect["volumeline"].x) * 100 / self.interactive_rect["volumeline"].w / 100, rel=False)
+				self.music_event_volumeline()
 			elif self.hold == "trackline":
-				if mx - self.x < self.interactive_rect["trackline"].x:
-					self.music_set_pos(0, rel=False)
-				elif mx - self.x > self.interactive_rect["trackline"].x + self.interactive_rect["trackline"].w:
-					self.music_set_pos(self.tracklist[self.index][1] * 1000, rel=False)
-				else:
-					self.music_set_pos((mx - self.x - self.interactive_rect["trackline"].x) * 100 / self.interactive_rect["trackline"].w * self.tracklist[self.index][1] * 10, rel=False)
-			elif self.hold != "noone":
-				if not self.pos_in_interactive(self.hold, mx, my):
-					self.hold = "noone"
+				self.music_event_trackline()
+			elif self.hold != "noone" and self.pos_in_interactive(self.hold, mx, my):
+				self.hold = "noone"
 
 		elif event.type == pg.MOUSEBUTTONDOWN:
 			mx, my = pg.mouse.get_pos()
@@ -369,32 +374,19 @@ class MusicPlayer:
 				elif self.pos_in_interactive("volumeline", mx, my, addwidth=8, addheight=8):
 					self.last_volume = self.volume
 					self.hold = "volumeline"
-					if mx - self.x < self.interactive_rect["volumeline"].x:
-						self.music_set_volume(0, rel=False)
-					elif mx - self.x > self.interactive_rect["volumeline"].x + self.interactive_rect["volumeline"].w:
-						self.music_set_volume(1, rel=False)
-					else:
-						self.music_set_volume((mx - self.x - self.interactive_rect["volumeline"].x) * 100 / self.interactive_rect["volumeline"].w / 100, rel=False)
+					self.music_event_volumeline()
 				elif self.pos_in_interactive("trackline", mx, my, addwidth=8, addheight=8):
+					self.was_playing = False
 					if self.play:
 						self.was_playing = True
 						self.music_pause_play()
-					else:
-						self.was_playing = False
 					self.hold = "trackline"
-					if mx - self.x < self.interactive_rect["trackline"].x:
-						self.music_set_pos(0, rel=False)
-					elif mx - self.x > self.interactive_rect["trackline"].x + self.interactive_rect["trackline"].w:
-						self.music_set_pos(self.tracklist[self.index][1] * 1000, rel=False)
-					else:
-						self.music_set_pos((mx - self.x - self.interactive_rect["trackline"].x) * 100 / self.interactive_rect["trackline"].w * self.tracklist[self.index][1] * 10, rel=False)
-
+					self.music_event_trackline()
 			if event.button == 4:
 				if self.pos_in_interactive("trackline", mx, my, addwidth=8, addheight=8):
 					self.music_set_pos(5000)
 				else:
 					self.music_set_volume(0.05)
-					
 			elif event.button == 5:
 				if self.pos_in_interactive("trackline", mx, my, addwidth=8, addheight=8):
 					self.music_set_pos(-5000)
@@ -411,34 +403,29 @@ class MusicPlayer:
 					if tmp != self.index:
 						self.loop = False
 					self.music_load_and_play(self.index)
-				self.hold = "noone"
 			elif self.hold == "next":
 				tmp = self.index
 				self.music_increase_index()
 				if tmp != self.index:
 					self.loop = False
 				self.music_load_and_play(self.index)
-				self.hold = "noone"
 			elif self.hold == "play":
 				self.music_pause_play()
-				self.hold = "noone"
 			elif self.hold == "loop":
 				if not self.loop:
 					self.loop = True
 				else:
 					self.loop = False
-				self.hold = "noone"
 			elif self.hold == "volume":
 				if self.volume > 0:
 					self.last_volume = self.volume
 					self.music_set_volume(0, rel=False)
 				else:
 					self.music_set_volume(self.last_volume, rel=False)
-			elif self.hold == "volumeline":
-				self.hold = "noone"
 			elif self.hold == "trackline":
 				if self.was_playing:
 					self.music_pause_play()
+			if self.hold != "noone":
 				self.hold = "noone"
 
 		elif event.type == pg.KEYDOWN:
