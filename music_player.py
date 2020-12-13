@@ -1,6 +1,7 @@
 import pygame as pg
 from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
+import random
 import os
 
 WHITE_TXT = (200, 200, 200)
@@ -28,6 +29,7 @@ class MusicPlayer:
 		self.play = True
 		self.index = 0
 		self.loop = False
+		self.random = False
 		self.hold = "noone"
 		self.surface = {
 						"previous" : pg.image.load("src/previous.png"),
@@ -51,7 +53,11 @@ class MusicPlayer:
 						"loop" : pg.image.load("src/loop.png"),
 						"loop_a" : pg.image.load("src/loop_a.png"),
 						"loop_on" : pg.image.load("src/loop_on.png"),
-						"loop_on_a" : pg.image.load("src/loop_on_a.png")
+						"loop_on_a" : pg.image.load("src/loop_on_a.png"),
+						"random" : pg.image.load("src/random.png"),
+						"random_a" : pg.image.load("src/random_a.png"),
+						"random_on" : pg.image.load("src/random_on.png"),
+						"random_on_a" : pg.image.load("src/random_on_a.png")
 						}
 		self.interactive_rect = {
 								"previous" : pg.Rect(21, 35, 15, 16),
@@ -60,7 +66,8 @@ class MusicPlayer:
 								"volume" : pg.Rect(110, 34, 22, 18),
 								"trackline" : pg.Rect(10, 13, 299, 4),
 								"volumeline" : pg.Rect(140, 41, 60, 4),
-								"loop" : pg.Rect(286, 32, 22, 21)
+								"loop" : pg.Rect(286, 32, 22, 21),
+								"random" : pg.Rect(320, 33, 30, 33)
 								}
 		self.load_musics()
 		pg.mixer.music.set_volume(self.volume)
@@ -203,6 +210,57 @@ class MusicPlayer:
 			self.volume = value
 		pg.mixer.music.set_volume(self.volume)
 
+	def music_random_on(self):
+		self.random = True
+		if len(self.tracklist) - 1 < 3:
+			return
+		self.tracklist_random = []
+		for i in self.tracklist:
+			tmp = []
+			for x in i:
+				tmp.append(x)
+			self.tracklist_random.append(tmp)
+		i, size = 0, len(self.tracklist_random) - 1
+		while i < size:
+			rand = i
+			while rand == i or rand == self.index:
+				rand = random.randint(0, size)
+			if i == self.index:
+				rand = 0
+			tmp = []
+			for x in self.tracklist[i]:
+				tmp.append(x)
+			self.tracklist[i] = []
+			for x in self.tracklist[rand]:
+				self.tracklist[i].append(x)
+			self.tracklist[rand] = []
+			for x in tmp:
+				self.tracklist[rand].append(x)
+			i += 1
+		self.index = 0
+		print("self.index", self.index)
+		print("old tracklist")
+		for i in self.tracklist_random:
+			print(i[0])
+		print("new tracklist")
+		for i in self.tracklist:
+			print(i[0])
+
+	def music_random_off(self):
+		self.random = False
+		if len(self.tracklist) - 1 < 3:
+			return
+		i = 0
+		while self.tracklist[self.index][0] != self.tracklist_random[i][0]:
+			i += 1
+		self.index = i
+		self.tracklist = []
+		for i in self.tracklist_random:
+			tmp = []
+			for x in i:
+				tmp.append(x)
+			self.tracklist.append(tmp)
+
 	def pos_in_interactive(self, name, mx, my, addwidth=0, addheight=0):
 		if pg.Rect(self.interactive_rect[name].x + self.x - addwidth / 2, self.interactive_rect[name].y + self.y - addheight / 2,
 			self.interactive_rect[name].width + addwidth, self.interactive_rect[name].height + addheight).collidepoint((mx, my)):
@@ -259,6 +317,14 @@ class MusicPlayer:
 			name += "_a"
 		surface.blit(self.surface[name], (x + self.interactive_rect["loop"].x, y + self.interactive_rect["loop"].y))
 
+		# RANDOM
+		name = "random"
+		if self.random:
+			name += "_on"
+		if self.hold != "random" and self.pos_in_interactive("random", mx, my):
+			name += "_a"
+		surface.blit(self.surface[name], (x + self.interactive_rect["random"].x, y + self.interactive_rect["random"].y))
+
 		# TIMER
 		# display y = 28 x = 206
 		# height max = 29 widht max = 74
@@ -278,6 +344,8 @@ class MusicPlayer:
 		# width max = 279 height max = 38
 		name_surface = self.tracklist[self.index][2]
 		surface.blit(name_surface, (x + 20 + 279 / 2 - name_surface.get_size()[0] / 2, y + 60 + 38 / 2 - name_surface.get_size()[1] / 2))
+
+
 
 		# VOLUMELINE
 		tmp_x, tmp_y = x + self.interactive_rect["volumeline"].x, y + self.interactive_rect["volumeline"].y
@@ -371,6 +439,8 @@ class MusicPlayer:
 					self.hold = "loop"
 				elif self.pos_in_interactive("volume", mx, my):
 					self.hold = "volume"
+				elif self.pos_in_interactive("random", mx, my):
+					self.hold = "random"
 				elif self.pos_in_interactive("volumeline", mx, my, addwidth=8, addheight=8):
 					self.last_volume = self.volume
 					self.hold = "volumeline"
@@ -416,6 +486,13 @@ class MusicPlayer:
 					self.loop = True
 				else:
 					self.loop = False
+			elif self.hold == "random":
+				if not self.random:
+					self.music_random_on()
+				else:
+					self.music_random_off()
+					self.random = False
+
 			elif self.hold == "volume":
 				if self.volume > 0:
 					self.last_volume = self.volume
