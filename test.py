@@ -12,7 +12,6 @@ class Chess:
 		
 	def init_pygame(self):
 		pg.init()
-		pg.mixer.init(44100, -16, 2, 2048)
 		icon_surface = pg.image.load('assets/icon.ico')
 		pg.display.set_icon(icon_surface)
 		pg.display.set_caption("Avoc Chess")

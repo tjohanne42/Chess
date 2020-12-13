@@ -1,5 +1,6 @@
 import pygame as pg
 from mutagen.mp3 import MP3
+from mutagen.oggvorbis import OggVorbis
 import os
 
 WHITE_TXT = (200, 200, 200)
@@ -72,6 +73,7 @@ class MusicPlayer:
 		while i < len(listdir):
 			if listdir[i].find(".mp3") != -1:
 				try:
+					pg.mixer.music.load("music/" + listdir[i])
 					song = MP3(f"music/{listdir[i]}")
 					# self.tracklist[i][2] = NAME SURFACE
 					# display x = 20 y = 62 width max = 279 height max = 38
@@ -83,7 +85,24 @@ class MusicPlayer:
 							break
 						count -= 1
 					self.tracklist.append(["music/" + listdir[i], song.info.length, name_txt, song.info.sample_rate])
-					print(name, song.info.bitrate, song.info.sample_rate)
+					print("mp3", name, song.info.bitrate, song.info.sample_rate)
+				except:
+					print(f"Couldn't load 'music/{listdir[i]}'")
+			elif listdir[i].find(".ogg") != -1:
+				try:
+					pg.mixer.music.load("music/" + listdir[i])
+					song = OggVorbis(f"music/{listdir[i]}")
+					# self.tracklist[i][2] = NAME SURFACE
+					# display x = 20 y = 62 width max = 279 height max = 38
+					name = listdir[i].strip(".ogg")
+					count = len(self.fonts) - 1
+					while count >= 0:
+						name_txt = self.fonts[count].render(name, True, WHITE_TXT)
+						if name_txt.get_size()[0] <= 279 and name_txt.get_size()[1] <= 38:
+							break
+						count -= 1
+					self.tracklist.append(["music/" + listdir[i], song.info.length, name_txt, song.info.sample_rate])
+					print("ogg", name, song.info.bitrate, song.info.sample_rate)
 				except:
 					print(f"Couldn't load 'music/{listdir[i]}'")
 			i += 1
