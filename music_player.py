@@ -3,6 +3,7 @@ from mutagen.mp3 import MP3
 from mutagen.oggvorbis import OggVorbis
 import random
 import os
+import music_player_tools as tools
 
 WHITE_TXT = (200, 200, 200)
 WHITE_LINE = (179, 179, 179)
