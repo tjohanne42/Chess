@@ -13,6 +13,8 @@ stockfish2 = "engine/stockfish.exe"
 deuterium = "engine/Deuterium.exe"
 cdrill = "engine/CDrill.exe"
 engine = chess.engine.SimpleEngine.popen_uci(deuterium)
+fen = board.fen().split(' ')[0].split('/')
+print(fen)
 while not board.is_game_over(claim_draw=True):
 	if board.turn:
 		count += 1
@@ -21,11 +23,14 @@ while not board.is_game_over(claim_draw=True):
 		movehistory.append(move.move)
 		board.push(move.move)
 		print(board)
-		print()
+		fen = board.fen().split(' ')[0].split('/')
+		print(fen)
 	else:
 		human_move = input()
 		board.push_san(human_move)
 		print(board)
+		fen = board.fen().split(' ')[0].split('/')
+		print(fen)
 		
 
 game.add_line(movehistory)
