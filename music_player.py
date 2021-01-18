@@ -400,7 +400,7 @@ class MusicPlayer:
 		if color1 == GREEN_LINE:
 			surface.blit(self.surface[name], (tmp_x + music_pos / (self.tracklist[self.index][1] * 1000) * 290, tmp_y - 4))
 
-	def music_event_volumeline(self):
+	def music_event_volumeline(self, mx, my):
 		if mx - self.x < self.interactive_rect["volumeline"].x:
 			self.music_set_volume(0, rel=False)
 		elif mx - self.x > self.interactive_rect["volumeline"].x + self.interactive_rect["volumeline"].w:
@@ -408,7 +408,7 @@ class MusicPlayer:
 		else:
 			self.music_set_volume((mx - self.x - self.interactive_rect["volumeline"].x) * 100 / self.interactive_rect["volumeline"].w / 100, rel=False)
 
-	def music_event_trackline(self):
+	def music_event_trackline(self, mx, my):
 		if mx - self.x < self.interactive_rect["trackline"].x:
 			self.music_set_pos(0, rel=False)
 		elif mx - self.x > self.interactive_rect["trackline"].x + self.interactive_rect["trackline"].w:
@@ -421,9 +421,9 @@ class MusicPlayer:
 		if event.type == pg.MOUSEMOTION:
 			mx, my = pg.mouse.get_pos()
 			if self.hold == "volumeline":
-				self.music_event_volumeline()
+				self.music_event_volumeline(mx, my)
 			elif self.hold == "trackline":
-				self.music_event_trackline()
+				self.music_event_trackline(mx, my)
 			elif self.hold != "noone" and self.pos_in_interactive(self.hold, mx, my):
 				self.hold = "noone"
 
@@ -445,14 +445,14 @@ class MusicPlayer:
 				elif self.pos_in_interactive("volumeline", mx, my, addwidth=8, addheight=8):
 					self.last_volume = self.volume
 					self.hold = "volumeline"
-					self.music_event_volumeline()
+					self.music_event_volumeline(mx, my)
 				elif self.pos_in_interactive("trackline", mx, my, addwidth=8, addheight=8):
 					self.was_playing = False
 					if self.play:
 						self.was_playing = True
 						self.music_pause_play()
 					self.hold = "trackline"
-					self.music_event_trackline()
+					self.music_event_trackline(mx, my)
 			if event.button == 4:
 				if self.pos_in_interactive("trackline", mx, my, addwidth=8, addheight=8):
 					self.music_set_pos(5000)
